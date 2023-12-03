@@ -26,6 +26,23 @@ model Post {
     @@index([name])
 }
 
+model Macros {
+    id       Int    @id @default(autoincrement())
+    name     String
+    proteins Int
+    carbs    Int
+    fats     Int
+    calories Int
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    createdBy   User   @relation(fields: [createdById], references: [id])
+    createdById String
+
+    @@index([name])
+}
+
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -62,6 +79,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
+    macros        Macros[]
 }
 
 model VerificationToken {
