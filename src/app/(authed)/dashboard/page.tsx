@@ -1,5 +1,4 @@
 import { CreateDailyMacros } from "@/app/_components/create-daily-macros";
-import { CreatePost } from "@/app/_components/create-post";
 import { getServerAuthSession } from "@/server/auth";
 import { api } from "@/trpc/server";
 import { RouterOutputs } from "@/trpc/shared";
@@ -19,17 +18,17 @@ export default async function Dashboard() {
       <h2 className="text-4xl">Dashboard</h2>
 
       <div className="mt-4 inline-flex items-center justify-center gap-8 rounded-xl bg-white bg-opacity-25 px-8 py-4">
-        <a href="/history" className=" hover:bg-slate-100 ">
+        {/* <a href="/history" className=" hover:bg-slate-100 ">
           Check previous day
-        </a>
+        </a> */}
         <span className="flex items-center rounded-full bg-slate-600 px-2 py-1 text-center text-lg">
           Today
           <br />
           {today.toLocaleDateString()}
         </span>
-        <a href="/history" className=" hover:bg-slate-100 ">
+        {/* <a href="/history" className=" hover:bg-slate-100 ">
           Check next day
-        </a>
+        </a> */}
       </div>
 
       <a href="/macros" className="mt-4 hover:opacity-75">
