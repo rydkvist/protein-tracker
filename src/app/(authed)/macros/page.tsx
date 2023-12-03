@@ -16,6 +16,10 @@ export default async function Macros() {
           {JSON.stringify(macro)}
         </div>
       ))}
+
+      <a href="/dashboard" className="mt-4 hover:opacity-75">
+        Go back to dashboard
+      </a>
     </div>
   );
 }

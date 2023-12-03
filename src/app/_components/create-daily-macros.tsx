@@ -4,21 +4,37 @@ import { RouterInputs, RouterOutputs } from "@/trpc/shared";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useMemo, useState } from "react";
 
-type CreateMacrosPOST = RouterInputs["macros"]["create"];
-type GetMacros = RouterOutputs["macros"]["getLatest"];
+type CreateMacrosInput = RouterInputs["macros"]["create"];
+type UpdateMacrosInput = RouterInputs["macros"]["update"];
+type FormMacros = Omit<CreateMacrosInput, "calories">;
+
+type GetMacrosOutput = RouterOutputs["macros"]["getAllMacros"][number];
 
 type Props = {
-  initialData?: GetMacros;
+  initialData: GetMacrosOutput | null;
 };
 
-export function CreateDailyMacros({ initialData = undefined }: Props) {
+const composeFormData = (data: GetMacrosOutput | null): FormMacros => {
+  if (!data) {
+    return {
+      name: new Date().toLocaleDateString(),
+      proteins: 0,
+      carbs: 0,
+      fats: 0,
+    };
+  }
+
+  return {
+    name: data.name,
+    proteins: data.proteins,
+    carbs: data.carbs,
+    fats: data.fats,
+  };
+};
+
+export function CreateDailyMacros({ initialData }: Props) {
   const router = useRouter();
-  const [form, setForm] = useState<Omit<CreateMacrosPOST, "calories">>({
-    name: initialData?.name ?? new Date().toLocaleDateString(),
-    proteins: initialData?.proteins ?? 0,
-    carbs: initialData?.carbs ?? 0,
-    fats: initialData?.fats ?? 0,
-  });
+  const [form, setForm] = useState<FormMacros>(composeFormData(initialData));
 
   const calories = useMemo(() => {
     return form.proteins * 4 + form.carbs * 4 + form.fats * 9;
@@ -37,20 +53,35 @@ export function CreateDailyMacros({ initialData = undefined }: Props) {
   const createMacros = api.macros.create.useMutation({
     onSuccess: (data) => {
       router.refresh();
-      setForm({
-        name: data.name,
-        proteins: data.proteins,
-        carbs: data.carbs,
-        fats: data.fats,
-      });
+      setForm(composeFormData(data));
     },
   });
+
+  const updateMacros = api.macros.update.useMutation({
+    onSuccess: (data) => {
+      router.refresh();
+      setForm(composeFormData(data));
+    },
+  });
+
+  function postMacros() {
+    if (initialData?.id) {
+      updateMacros.mutate({
+        id: initialData.id,
+        ...form,
+        calories,
+      });
+    } else {
+      createMacros.mutate({ ...form, calories });
+    }
+  }
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        createMacros.mutate({ ...form, calories });
+
+        postMacros();
       }}
       className="flex flex-col gap-2"
     >
